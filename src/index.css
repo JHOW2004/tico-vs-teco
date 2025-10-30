@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    background: #0A0A0A;
+    color: #fff;
+  }
+}
+
+@layer utilities {
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      text-shadow: 0 0 20px rgba(0, 225, 200, 0.5),
+                   0 0 40px rgba(194, 0, 224, 0.3),
+                   0 0 60px rgba(225, 95, 0, 0.2);
+    }
+    50% {
+      text-shadow: 0 0 30px rgba(0, 225, 200, 0.8),
+                   0 0 60px rgba(194, 0, 224, 0.5),
+                   0 0 90px rgba(225, 95, 0, 0.3);
+    }
+  }
+
+  @keyframes draw-x {
+    0% {
+      stroke-dasharray: 0, 100;
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      stroke-dasharray: 100, 0;
+      opacity: 1;
+    }
+  }
+
+  @keyframes draw-o {
+    0% {
+      stroke-dasharray: 0, 100;
+      opacity: 0;
+      transform: rotate(-90deg);
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      stroke-dasharray: 100, 0;
+      opacity: 1;
+      transform: rotate(0deg);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 1s ease-out;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+
+  .animate-draw-x {
+    animation: draw-x 0.6s ease-out;
+  }
+
+  .animate-draw-o {
+    animation: draw-o 0.6s ease-out;
+    transform-origin: center;
+  }
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #00E1C8 #0A0A0A;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #0A0A0A;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #00E1C8;
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #E15F00;
+}
