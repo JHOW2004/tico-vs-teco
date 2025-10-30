@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../../lib/firebase';
-import { X } from 'lucide-react';
+import { getCountryFromIP } from '../../utils/geolocation';
+import { X, Loader as LoaderIcon } from 'lucide-react';
 
 interface RegisterProps {
   onClose: () => void;
@@ -18,6 +19,22 @@ export function Register({ onClose, onSwitchToLogin, onSuccess }: RegisterProps)
   const [country, setCountry] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingCountry, setLoadingCountry] = useState(true);
+
+  useEffect(() => {
+    loadCountry();
+  }, []);
+
+  const loadCountry = async () => {
+    try {
+      const detectedCountry = await getCountryFromIP();
+      setCountry(detectedCountry);
+    } catch (error) {
+      console.error('Error loading country:', error);
+    } finally {
+      setLoadingCountry(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,13 +140,19 @@ export function Register({ onClose, onSwitchToLogin, onSuccess }: RegisterProps)
             <label className="block text-[#C200E0] mb-2 font-bold uppercase text-sm">
               País
             </label>
-            <input
-              type="text"
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-              className="w-full bg-black border-2 border-[#C200E0] rounded px-4 py-3 text-white focus:border-[#E15F00] focus:outline-none transition-colors"
-              required
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                className="w-full bg-black border-2 border-[#C200E0] rounded px-4 py-3 text-white focus:border-[#E15F00] focus:outline-none transition-colors"
+                required
+                disabled={loadingCountry}
+              />
+              {loadingCountry && (
+                <LoaderIcon className="absolute right-3 top-3 animate-spin text-[#C200E0]" size={20} />
+              )}
+            </div>
           </div>
 
           <button

@@ -3,6 +3,7 @@ import { doc, onSnapshot, updateDoc, deleteDoc, getDoc, increment } from 'fireba
 import { db } from '../../lib/firebase';
 import { GameRoom } from '../../types/game';
 import { GameBoard } from '../GameBoard';
+import { ChatBox } from './ChatBox';
 import { checkWinner, isBoardFull } from '../../utils/gameLogic';
 import { ArrowLeft, RotateCcw, Loader, CheckCircle, XCircle } from 'lucide-react';
 
@@ -18,10 +19,26 @@ export function OnlineGameRoom({ roomId, userId, onLeave }: OnlineGameRoomProps)
   const [winner, setWinner] = useState<string | null>(null);
   const [winningLine, setWinningLine] = useState<number[]>([]);
   const [pointsUpdated, setPointsUpdated] = useState(false);
+  const [userName, setUserName] = useState('Jogador');
 
   const isHost = room?.hostId === userId;
   const mySymbol = isHost ? room?.hostSymbol : room?.guestSymbol;
   const isMyTurn = room?.currentTurn === userId;
+
+  useEffect(() => {
+    loadUserName();
+  }, [userId]);
+
+  const loadUserName = async () => {
+    try {
+      const userDoc = await getDoc(doc(db, 'users', userId));
+      if (userDoc.exists()) {
+        setUserName(userDoc.data().name || 'Jogador');
+      }
+    } catch (error) {
+      console.error('Error loading user name:', error);
+    }
+  };
 
   useEffect(() => {
     const roomRef = doc(db, 'rooms', roomId);
@@ -186,7 +203,7 @@ export function OnlineGameRoom({ roomId, userId, onLeave }: OnlineGameRoomProps)
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center p-4">
-      <div className="max-w-2xl w-full space-y-6">
+      <div className="max-w-6xl w-full space-y-6">
         <div className="flex items-center justify-between">
           <button
             onClick={leaveRoom}
@@ -203,70 +220,83 @@ export function OnlineGameRoom({ roomId, userId, onLeave }: OnlineGameRoomProps)
           <div className="w-20"></div>
         </div>
 
-        <div className="bg-black/50 border-2 border-[#00E1C8] rounded-lg p-6 text-center">
-          {winner ? (
-            <div className="space-y-4">
-              <p className={`text-2xl sm:text-3xl font-bold animate-pulse ${getWinnerColor()}`}>
-                {getWinnerText()}
-              </p>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="space-y-6">
+            <div className="bg-black/50 border-2 border-[#00E1C8] rounded-lg p-6 text-center">
+              {winner ? (
+                <div className="space-y-4">
+                  <p className={`text-2xl sm:text-3xl font-bold animate-pulse ${getWinnerColor()}`}>
+                    {getWinnerText()}
+                  </p>
 
-              {room.rematchRequested ? (
-                room.rematchRequested === userId ? (
-                  <p className="text-lg text-[#C200E0]">Aguardando resposta da revanche...</p>
-                ) : (
-                  <div className="flex gap-4 justify-center">
-                    <button
-                      onClick={acceptRematch}
-                      className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded uppercase transition-all"
-                    >
-                      <CheckCircle size={20} />
-                      Aceitar Revanche
-                    </button>
-                    <button
-                      onClick={declineRematch}
-                      className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded uppercase transition-all"
-                    >
-                      <XCircle size={20} />
-                      Recusar
-                    </button>
-                  </div>
-                )
-              ) : (
-                <div className="flex gap-4 justify-center">
-                  <button
-                    onClick={requestRematch}
-                    className="flex items-center gap-2 bg-[#00E1C8] hover:bg-[#E15F00] text-black font-bold py-3 px-6 rounded uppercase transition-all"
-                  >
-                    <RotateCcw size={20} />
-                    Revanche
-                  </button>
-                  <button
-                    onClick={leaveRoom}
-                    className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded uppercase transition-all"
-                  >
-                    Sair
-                  </button>
+                  {room.rematchRequested ? (
+                    room.rematchRequested === userId ? (
+                      <p className="text-lg text-[#C200E0]">Aguardando resposta da revanche...</p>
+                    ) : (
+                      <div className="flex gap-4 justify-center">
+                        <button
+                          onClick={acceptRematch}
+                          className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded uppercase transition-all"
+                        >
+                          <CheckCircle size={20} />
+                          Aceitar Revanche
+                        </button>
+                        <button
+                          onClick={declineRematch}
+                          className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded uppercase transition-all"
+                        >
+                          <XCircle size={20} />
+                          Recusar
+                        </button>
+                      </div>
+                    )
+                  ) : (
+                    <div className="flex gap-4 justify-center">
+                      <button
+                        onClick={requestRematch}
+                        className="flex items-center gap-2 bg-[#00E1C8] hover:bg-[#E15F00] text-black font-bold py-3 px-6 rounded uppercase transition-all"
+                      >
+                        <RotateCcw size={20} />
+                        Revanche
+                      </button>
+                      <button
+                        onClick={leaveRoom}
+                        className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded uppercase transition-all"
+                      >
+                        Sair
+                      </button>
+                    </div>
+                  )}
                 </div>
+              ) : (
+                <p className="text-xl sm:text-2xl font-bold text-white">
+                  {isMyTurn ? (
+                    <span className="text-[#00E1C8]">Sua vez! ({mySymbol})</span>
+                  ) : (
+                    <span className="text-[#C200E0]">Vez do oponente</span>
+                  )}
+                </p>
               )}
             </div>
-          ) : (
-            <p className="text-xl sm:text-2xl font-bold text-white">
-              {isMyTurn ? (
-                <span className="text-[#00E1C8]">Sua vez! ({mySymbol})</span>
-              ) : (
-                <span className="text-[#C200E0]">Vez do oponente</span>
-              )}
-            </p>
-          )}
-        </div>
 
-        <GameBoard
-          board={room.board}
-          onCellClick={handleCellClick}
-          disabled={!isMyTurn}
-          winner={winner}
-          winningLine={winningLine}
-        />
+            <GameBoard
+              board={room.board}
+              onCellClick={handleCellClick}
+              disabled={!isMyTurn}
+              winner={winner}
+              winningLine={winningLine}
+            />
+          </div>
+
+          <div>
+            <ChatBox
+              roomId={roomId}
+              userId={userId}
+              userName={userName}
+              messages={room.messages || []}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

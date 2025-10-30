@@ -46,7 +46,8 @@ export function RoomList({ onBack, userId, onJoinRoom }: RoomListProps) {
         createdAt: Date.now(),
         hostSymbol: 'X',
         guestSymbol: 'O',
-        rematchRequested: null
+        rematchRequested: null,
+        messages: []
       };
 
       const docRef = await addDoc(collection(db, 'rooms'), newRoom);

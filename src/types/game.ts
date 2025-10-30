@@ -20,6 +20,15 @@ export interface GameRoom {
   hostSymbol: string;
   guestSymbol: string;
   rematchRequested?: string | null;
+  messages?: ChatMessage[];
+}
+
+export interface ChatMessage {
+  id: string;
+  userId: string;
+  userName: string;
+  message: string;
+  timestamp: number;
 }
 
 export interface RankingEntry {
