@@ -47,6 +47,21 @@ export function OnlineGameRoom({ roomId, userId, onLeave }: OnlineGameRoomProps)
         const roomData = { id: snapshot.id, ...snapshot.data() } as GameRoom;
         setRoom(roomData);
 
+        // ★ FIX (1/2): se uma revanche foi aceita em QUALQUER cliente,
+        // e a sala voltou para "playing" com winner nulo / tabuleiro zerado,
+        // reseta SEMPRE os estados locais em AMBOS os clientes.
+        const isBoardCleared = Array.isArray(roomData.board) && roomData.board.every((c) => c === null);
+        const shouldResetLocal =
+          roomData.status === 'playing' &&
+          roomData.winner == null &&
+          isBoardCleared;
+
+        if (shouldResetLocal) {
+          setWinner(null);
+          setWinningLine([]);
+          setPointsUpdated(false);
+        }
+
         const { winner: gameWinner, line } = checkWinner(roomData.board);
         if (gameWinner && !pointsUpdated) {
           setWinner(gameWinner);
@@ -63,7 +78,9 @@ export function OnlineGameRoom({ roomId, userId, onLeave }: OnlineGameRoomProps)
     });
 
     return () => unsubscribe();
-  }, [roomId, pointsUpdated]);
+    // ★ FIX (2/2): adicionamos 'roomId' e 'pointsUpdated' já existia; mantemos.
+    // Não precisamos de 'winner' nas deps porque o reset é baseado no snapshot (roomData), não no estado anterior.
+  }, [roomId, pointsUpdated, onLeave]);
 
   const updatePoints = async (winnerSymbol: string, roomData: GameRoom) => {
     if (pointsUpdated) return;
@@ -132,6 +149,8 @@ export function OnlineGameRoom({ roomId, userId, onLeave }: OnlineGameRoomProps)
         status: 'playing',
         rematchRequested: null
       });
+      // Mantemos os resets locais aqui também (quem aceitar já fica pronto),
+      // mas o FIX garante que o OUTRO jogador seja resetado via snapshot.
       setWinner(null);
       setWinningLine([]);
       setPointsUpdated(false);
