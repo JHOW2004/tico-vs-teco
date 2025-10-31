@@ -47,9 +47,6 @@ export function OnlineGameRoom({ roomId, userId, onLeave }: OnlineGameRoomProps)
         const roomData = { id: snapshot.id, ...snapshot.data() } as GameRoom;
         setRoom(roomData);
 
-        // ★ FIX (1/2): se uma revanche foi aceita em QUALQUER cliente,
-        // e a sala voltou para "playing" com winner nulo / tabuleiro zerado,
-        // reseta SEMPRE os estados locais em AMBOS os clientes.
         const isBoardCleared = Array.isArray(roomData.board) && roomData.board.every((c) => c === null);
         const shouldResetLocal =
           roomData.status === 'playing' &&
@@ -78,8 +75,7 @@ export function OnlineGameRoom({ roomId, userId, onLeave }: OnlineGameRoomProps)
     });
 
     return () => unsubscribe();
-    // ★ FIX (2/2): adicionamos 'roomId' e 'pointsUpdated' já existia; mantemos.
-    // Não precisamos de 'winner' nas deps porque o reset é baseado no snapshot (roomData), não no estado anterior.
+    
   }, [roomId, pointsUpdated, onLeave]);
 
   const updatePoints = async (winnerSymbol: string, roomData: GameRoom) => {
@@ -149,8 +145,7 @@ export function OnlineGameRoom({ roomId, userId, onLeave }: OnlineGameRoomProps)
         status: 'playing',
         rematchRequested: null
       });
-      // Mantemos os resets locais aqui também (quem aceitar já fica pronto),
-      // mas o FIX garante que o OUTRO jogador seja resetado via snapshot.
+      
       setWinner(null);
       setWinningLine([]);
       setPointsUpdated(false);
@@ -221,7 +216,7 @@ export function OnlineGameRoom({ roomId, userId, onLeave }: OnlineGameRoomProps)
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center p-4">
+    <div className="bg-[#0A0A0A] flex flex-col items-center justify-center p-4">
       <div className="max-w-6xl w-full space-y-6">
         <div className="flex items-center justify-between">
           <button

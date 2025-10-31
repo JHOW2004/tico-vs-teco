@@ -47,7 +47,7 @@ export function ChatBox({ roomId, userId, userName, messages }: ChatBoxProps) {
   };
 
   return (
-    <div className="bg-black/50 border-2 border-[#00E1C8] rounded-lg overflow-hidden flex flex-col" style={{ height: '400px' }}>
+    <div className="bg-black/50 border-2 border-[#00E1C8] rounded-lg overflow-hidden flex flex-col" style={{ height: '200px' }}>
       <div className="bg-[#00E1C8] p-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <MessageCircle size={20} className="text-black" />
