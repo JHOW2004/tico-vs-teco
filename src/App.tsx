@@ -81,7 +81,7 @@ function App() {
 
   return (
     <>
-      {currentScreen !== "online-game" && user && currentRoomId && (
+      {currentScreen !== "online-game" && (
         <MusicControls />
       )}
       
