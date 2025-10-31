@@ -81,8 +81,10 @@ function App() {
 
   return (
     <>
-      <MusicControls />
-
+      {currentScreen !== "online-game" && user && currentRoomId && (
+        <MusicControls />
+      )}
+      
       {currentScreen === "menu" && (
         <MainMenu
           onSelectMode={handleSelectMode}
